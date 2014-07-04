@@ -2,7 +2,10 @@ import socket
 import sys
 import urllib2
 import json
-from cPickle import load, dump
+
+
+
+
 
 server = "irc.twitch.tv"       #settings
 channel = "#apsona"
@@ -22,10 +25,9 @@ def connect():
     irc.send("JOIN "+ channel +"\n")        #join the chan
 
 connect()	
-f=open("msgs.pcl","rb")
-messageDict=load(f)
-f.close()
-print messageDict
+
+basicCmds = json.load(open("basicCommands"))
+
 while 1:    #puts it in a loop
     text=irc.recv(2040)  #receive the text
     print text   #print text to console
@@ -40,41 +42,9 @@ while 1:    #puts it in a loop
 	
     if text.find('PING') != -1: #check if 'PING' is found
         irc.send('PONG ' + text.split() [1] + '\r\n') #returns 'PONG' back to the server (prevents pinging out!)
-	  
-    if text.find(':,tell') !=-1: #check for tell msgs
-        to = body.split()[1] #get the desired recipiant of the message
-        msg = " ".join(body.split()[2:]) # get the body of the message
-        # print sender
-        # print to
-        # print msg
-        if to in messageDict:
-            messageDict[to].append("Hey " + to + ", " + sender + " left you the message " + '"' + msg + '" \r\n')
-        else:
-            messageDict[to]= [sender + " left you the message " + '"' + msg + '" \r\n']
-		
-        f=open("msgs.pcl","wb")
-        dump(messageDict,f)
-        f.close()
-        irc.send('PRIVchMSG '+channel+' :Noted. \r\n')
- 
-    if sender in messageDict and command=="PRIVMSG":
-        msgs= messageDict[sender]
-        del messageDict[sender]
-        irc.send('PRIVMSG '+channel+' :'+ sender+ ' you have ' +str(len(msgs))+ ' message(s). \r\n')
-        for msg in msgs:
-            irc.send('PRIVMSG '+channel+' :'+msg)
-        f=open("msgs.pcl","wb")
-        dump(messageDict,f)
-        f.close()
-	
-    if text.find(':,search') !=-1:
 
-        query="+".join(body.split()[1:])
-        result=json.loads(urllib2.urlopen("https://www.hackerrank.com/rest/contests/master/challenges?query="+query).read())
-        output=[prob["name"]+": "+"https://www.hackerrank.com/challenges/"+prob["slug"] for prob in result["models"]]
+    if body and body.split()[0] == "!commands":
+        irc.send("PRIVMSG " + channel + " :" +  ", ".join(basicCmds.keys()) + "\r\n")
 
-        if len(output)==0:
-            irc.send('PRIVMSG '+channel+' :No results found. \r\n')
-        else:
-            for result in output:
-                irc.send('PRIVMSG '+channel+' :' + result + ' \r\n')
+    if body and body.split()[0] in basicCmds:
+        irc.send("PRIVMSG " + channel + " :" + basicCmds[body.split()[0]] + "\r\n") 
