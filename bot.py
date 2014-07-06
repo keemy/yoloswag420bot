@@ -2,10 +2,8 @@ import socket
 import sys
 import urllib2
 import json
-
-
-
-
+from collections import defaultdict
+api_key = "api_key="
 
 server = "irc.twitch.tv"       #settings
 channel = "#apsona"
@@ -27,6 +25,22 @@ def connect():
 connect()	
 
 basicCmds = json.load(open("basicCommands"))
+runes = json.load(open("runeData"))["data"]
+advCmds = {}
+
+def currentRunes():
+    pages = json.load(urllib2("https://na.api.pvp.net/api/lol/na/v1.4/summoner/20097656/runes?"+api_key))["20097656"]["pages"]
+    cur = [page for page in pages if page["current"]][0]["slots"]
+    
+    stats = defaultdict(float)
+    for rune in cur:
+        runeStats = runes[cur["runeId"]]["stats"]
+        for stat, value in runeStats.iteritems():
+            stats[stat]+=value
+
+    return str(stats)
+advCmds["!runes"] = currentRunes
+
 
 while 1:    #puts it in a loop
     text=irc.recv(2040)  #receive the text
@@ -44,7 +58,10 @@ while 1:    #puts it in a loop
         irc.send('PONG ' + text.split() [1] + '\r\n') #returns 'PONG' back to the server (prevents pinging out!)
 
     if body and body.split()[0] == "!commands":
-        irc.send("PRIVMSG " + channel + " :" +  ", ".join(basicCmds.keys()) + "\r\n")
+        irc.send("PRIVMSG " + channel + " :" +  ", ".join((basicCmds+advCmds).keys()) + "\r\n")
 
     if body and body.split()[0] in basicCmds:
-        irc.send("PRIVMSG " + channel + " :" + basicCmds[body.split()[0]] + "\r\n") 
+        irc.send("PRIVMSG " + channel + " :" + basicCmds[body.split()[0]] + "\r\n")
+
+    if body and body.split()[0] in advCmds:
+        irc.send("PRIVMSG " + channel + " :" + basicCmds[body.split()[0]]() + "\r\n")
