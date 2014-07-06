@@ -4,7 +4,10 @@ import urllib2
 import json
 from collections import defaultdict
 
+
+#getting commands
 from advCmds import advCmds
+basicCmds = json.load(open("basicCommands"))
 
 
 config = json.load(open("config"))
@@ -31,20 +34,7 @@ def connect():
 connect()	
 
 basicCmds = json.load(open("basicCommands"))
-#runes = json.load(open("runeData"))["data"]
-#advCmds = {}
 
-#def currentRunes():
-#    pages = json.load(urllib2.urlopen("https://na.api.pvp.net/api/lol/na/v1.4/summoner/20097656/runes?"+api_key))["20097656"]["pages"]
-#    cur = [page for page in pages if page["current"]][0]["slots"]
-#    
-#    stats = defaultdict(float)
-#    for rune in cur:
-#        runeStats = runes[str(rune["runeId"])]["stats"]
-#        for stat, value in runeStats.iteritems():
-#            stats[stat]+=value
-#    return str(dict(stats))
-#advCmds["!runes"] = currentRunes
 
 
 
