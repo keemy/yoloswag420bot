@@ -31,31 +31,21 @@ def connect():
 connect()	
 
 basicCmds = json.load(open("basicCommands"))
-#runes = json.load(open("runeData"))["data"]
-#advCmds = {}
-
-#def currentRunes():
-#    pages = json.load(urllib2.urlopen("https://na.api.pvp.net/api/lol/na/v1.4/summoner/20097656/runes?"+api_key))["20097656"]["pages"]
-#    cur = [page for page in pages if page["current"]][0]["slots"]
-#    
-#    stats = defaultdict(float)
-#    for rune in cur:
-#        runeStats = runes[str(rune["runeId"])]["stats"]
-#        for stat, value in runeStats.iteritems():
-#            stats[stat]+=value
-#    return str(dict(stats))
-#advCmds["!runes"] = currentRunes
 
 
+def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
 while 1:    #puts it in a loop
-    text=irc.recv(2040)  #receive the text
+    text = irc.recv(2040)  #receive the text
+    text = removeNonAscii(text)
     print text   #print text to console
 	
     sender = text.split("!")[0][1:] #who sent message
     body=(channel+" :").join(text.split(channel+" :")[1:]) #message text
+    body=body.strip() 
     command = text.split()[1] #get the command should be PRIVMSG JOIN PART QUIT 
-	
+
+
     if len(text)==0:
         print "Disconnected!"
         connect()
