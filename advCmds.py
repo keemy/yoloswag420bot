@@ -60,3 +60,9 @@ def skinCode(a=[-1]):
         return "No more codes kids"
 
 advCmds["!skincode"]=skinCode
+
+def trivia():
+    #placeholder
+    return "to be imlemented soon"
+
+advCmds["!trivia"] = trivia
