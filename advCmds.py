@@ -2,6 +2,7 @@ import socket
 import sys
 import urllib2
 import json
+import sqlite3
 from collections import defaultdict
 
 config = json.load(open("config"))
@@ -62,7 +63,19 @@ def skinCode(a=[-1]):
 advCmds["!skincode"]=skinCode
 
 def trivia():
-    #placeholder
-    return "to be imlemented soon"
+    conn = sqlite3.connect("bot.db")
+    c = conn.cursor()
+    
+    c.execute("SELECT * FROM trivia ORDER BY RANDOM() LIMIT 1")
+    
+    question = c.fetchone()
 
+    def anono():
+        del advCmds[question[2]]
+        return "gj bud u got it"
+    advCmds[question[2]]=anono
+
+    conn.close()
+
+    return question[1]
 advCmds["!trivia"] = trivia
