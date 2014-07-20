@@ -79,3 +79,4 @@ def trivia():
 
     return question[1]
 advCmds["!trivia"] = trivia
+
