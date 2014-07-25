@@ -35,29 +35,36 @@ basicCmds = json.load(open("basicCommands"))
 
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
-while 1:    #puts it in a loop
-    text = irc.recv(2040)  #receive the text
-    text = removeNonAscii(text)
-    print text   #print text to console
+def mainloop():
+    while 1:    #puts it in a loop
+        text = irc.recv(2040)  #receive the text
+        text = removeNonAscii(text)
+        print text   #print text to console
 	
-    sender = text.split("!")[0][1:] #who sent message
-    body=(channel+" :").join(text.split(channel+" :")[1:]) #message text
-    body=body.strip() 
-    command = text.split()[1] #get the command should be PRIVMSG JOIN PART QUIT 
+        sender = text.split("!")[0][1:] #who sent message
+        body=(channel+" :").join(text.split(channel+" :")[1:]) #message text
+        body=body.strip() 
+        command = text.split()[1] #get the command should be PRIVMSG JOIN PART QUIT 
 
 
-    if len(text)==0:
-        print "Disconnected!"
-        connect()
+        if len(text)==0:
+            print "Disconnected!"
+            connect()
 	
-    if text.find('PING') != -1: #check if 'PING' is found
-        irc.send('PONG ' + text.split() [1] + '\r\n') #returns 'PONG' back to the server (prevents pinging out!)
+        if text.find('PING') != -1: #check if 'PING' is found
+            irc.send('PONG ' + text.split() [1] + '\r\n') #returns 'PONG' back to the server (prevents pinging out!)
 
-    if body and body.split()[0] == "!commands":
-        irc.send("PRIVMSG " + channel + " :" +  ", ".join(basicCmds.keys()+advCmds.keys()) + "\r\n")
+        if body and body.split()[0] == "!commands":
+            irc.send("PRIVMSG " + channel + " :" +  ", ".join(basicCmds.keys()+advCmds.keys()) + "\r\n")
 
-    if body and body.split()[0] in basicCmds:
-        irc.send("PRIVMSG " + channel + " :" + basicCmds[body.split()[0]] + "\r\n")
+        if body and body.split()[0] in basicCmds:
+            irc.send("PRIVMSG " + channel + " :" + basicCmds[body.split()[0]] + "\r\n")
 
-    if body and body.split()[0] in advCmds:
-        irc.send("PRIVMSG " + channel + " :" + advCmds[body.split()[0]]() + "\r\n")
+        if body and body.split()[0] in advCmds:
+            irc.send("PRIVMSG " + channel + " :" + advCmds[body.split()[0]]() + "\r\n")
+
+while True:
+    try:
+        mainloop()
+    except:
+        print "wtfmate"
